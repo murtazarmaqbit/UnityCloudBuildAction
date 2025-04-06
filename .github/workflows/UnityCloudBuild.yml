@@ -472,7 +472,7 @@ jobs:
       env:
        OR_RESULT_STRING_TEAMS: ${{ needs.UploadToOculusReleaseChannel.result == 'success' && '&#x2705;' || '&#x274c;' }} ${{ needs.UploadToOculusReleaseChannel.result }}
       run: |
-       echo OCULUSRELEASERESULT_STRING_TEAMS="OculusRelease $OR_RESULT_STRING_TEAMS " >> "$GITHUB_ENV"
+       echo OCULUSRELEASERESULT_STRING_TEAMS="$OR_RESULT_STRING_TEAMS " >> "$GITHUB_ENV"
 
     - name: Set UNITYGAMEHOSTINGUPLOADRESULT_STRING env
       if: ${{ inputs.UploadToUnityGameServerHosting }}
