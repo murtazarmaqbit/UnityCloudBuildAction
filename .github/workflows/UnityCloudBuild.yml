@@ -470,7 +470,7 @@ jobs:
     - name: Set OCULUSRELEASERESULT_STRING_TEAMS env
       if: ${{ inputs.UploadToOculusReleaseChannel }}
       env:
-       OR_RESULT_STRING_TEAMS: ${{ needs.UploadToOculusReleaseChannel.result == 'success' && '(checkmark)' || '(crossmark)' }} ${{ needs.UploadToOculusReleaseChannel.result }}
+       OR_RESULT_STRING_TEAMS: ${{ needs.UploadToOculusReleaseChannel.result == 'success' && '&#x2705;' || '&#x274c;' }} ${{ needs.UploadToOculusReleaseChannel.result }}
       run: |
        echo OCULUSRELEASERESULT_STRING_TEAMS="OculusRelease $OR_RESULT_STRING_TEAMS " >> "$GITHUB_ENV"
 
@@ -518,7 +518,7 @@ jobs:
                 "activitySubtitle": "<${{ github.event.pull_request.url || github.event.head_commit.url }}|${{ github.event.pull_request.title || github.event.head_commit.message}}>",
                 "facts": [{
                     "name": "Unity Build Status",
-                    "value": "${{ needs.Build.result == 'success' && '(checkmark)' || '(crossmark)' }} ${{ needs.Build.result }}"
+                    "value": "${{ needs.Build.result == 'success' && '&#x2705;' || '&#x274c;' }} ${{ needs.Build.result }}"
                 },
                 {
                     "name": "Oculus Upload Status",
