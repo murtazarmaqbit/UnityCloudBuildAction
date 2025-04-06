@@ -90,6 +90,9 @@ on:
        
      SlackBotAuthToken: # passing this enables slack reporting
        required: false
+     
+     TeamsWebhook:
+       required: false
        
      AppStoreConnect_Auth_Key:
        required: false
@@ -463,6 +466,13 @@ jobs:
        OR_RESULT_STRING: ${{ needs.UploadToOculusReleaseChannel.result == 'success' && ':green_heart:' || ':x:' }} ${{ needs.UploadToOculusReleaseChannel.result }}
       run: |
        echo OCULUSRELEASERESULT_STRING="OculusRelease $OR_RESULT_STRING " >> "$GITHUB_ENV"
+    
+    - name: Set OCULUSRELEASERESULT_STRING_TEAMS env
+      if: ${{ inputs.UploadToOculusReleaseChannel }}
+      env:
+       OR_RESULT_STRING_TEAMS: ${{ needs.UploadToOculusReleaseChannel.result == 'success' && '(checkmark)' || '(crossmark)' }} ${{ needs.UploadToOculusReleaseChannel.result }}
+      run: |
+       echo OCULUSRELEASERESULT_STRING_TEAMS="OculusRelease $OR_RESULT_STRING_TEAMS " >> "$GITHUB_ENV"
 
     - name: Set UNITYGAMEHOSTINGUPLOADRESULT_STRING env
       if: ${{ inputs.UploadToUnityGameServerHosting }}
@@ -492,3 +502,24 @@ jobs:
       with:
        channel-id: ${{ inputs.SlackBotChannelId }}
        slack-message: "`${{github.repository}}/${{github.github.ref_name}}${{github.workflow}}` Build Result: ${{env.RESULT_STRING}} ${{ env.TESTFLIGHTRESULT_STRING }} ${{ env.OCULUSRELEASERESULT_STRING }} ${{ env.UNITYGAMEHOSTINGUPLOADRESULT_STRING }} ${{ env.UPLOADTOSTEAM_RESULT_STRING }}\n:pencil2: ${{env.COMMIT_STRING}} ${{ env.BRANCH_STRING }} \n:runner: ${{env.RUN_URL}} \n${{ env.SHARE_STRING }}"
+
+    - name: Notify Teams
+      continue-on-error: true
+      uses: simbo/msteams-message-card-action@latest
+      with:
+        webhook: ${{secrets.TeamsWebhook}}
+        title: Build Status
+        message: Unity and Oculus Build Status
+        sections: |
+          -
+            activityTitle: Workflow Details
+            activitySubtitle: Given below
+            facts:
+              -
+                name: "Unity Build Status"
+                value: ${{ needs.Build.result == 'success' && '(checkmark)' || '(crossmark)' }} ${{ needs.Build.result }}
+
+              -
+                name: "Oculus Upload Status"
+                value: ${{env.OCULUSRELEASERESULT_STRING_TEAMS}}
+            text: <${{ github.event.pull_request.url || github.event.head_commit.url }}|${{ github.event.pull_request.title || github.event.head_commit.message}}>
