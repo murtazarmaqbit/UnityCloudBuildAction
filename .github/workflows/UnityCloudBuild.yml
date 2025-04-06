@@ -505,21 +505,24 @@ jobs:
 
     - name: Notify Teams
       continue-on-error: true
-      uses: simbo/msteams-message-card-action@latest
-      with:
-        webhook: ${{secrets.TeamsWebhook}}
-        title: Build Status
-        message: Unity and Oculus Build Status
-        sections: |
-          -
-            activityTitle: Workflow Details
-            activitySubtitle: Given below
-            facts:
-              -
-                name: "Unity Build Status"
-                value: ${{ needs.Build.result == 'success' && '(checkmark)' || '(crossmark)' }} ${{ needs.Build.result }}
-
-              -
-                name: "Oculus Upload Status"
-                value: ${{env.OCULUSRELEASERESULT_STRING_TEAMS}}
-            text: <${{ github.event.pull_request.url || github.event.head_commit.url }}|${{ github.event.pull_request.title || github.event.head_commit.message}}>
+      run: |
+        curl -X POST ${{ secrets.TeamsWebhook }} \
+          -H "Content-Type: application/json" \
+          -d '{
+            "@type": "MessageCard",
+            "@context": "http://schema.org/extensions",
+            "themeColor": "0076D7",
+            "summary": "Oculus - New Build",
+            "sections": [{
+                "activityTitle": "A new build was uploaded to Oculus",
+                "activitySubtitle": "<${{ github.event.pull_request.url || github.event.head_commit.url }}|${{ github.event.pull_request.title || github.event.head_commit.message}}>",
+                "facts": [{
+                    "name": "Unity Build Status",
+                    "value": "${{ needs.Build.result == 'success' && '(checkmark)' || '(crossmark)' }} ${{ needs.Build.result }}"
+                },
+                {
+                    "name": "Oculus Upload Status",
+                    "value": "${{env.OCULUSRELEASERESULT_STRING_TEAMS}}"
+                }]
+            }]
+          }'
